@@ -15,9 +15,12 @@
      원자 form factor와 Compton 파라미터는 내장 원소 테이블에서 가져옵니다.
 
 Run with:
-    uv run --extra examples python examples/generate_example_data.py /tmp/ezpit_demo
-    uv run --extra examples python examples/demo_experimental_data_testingcode_0731_2026.py \
-        /tmp/ezpit_demo/synthetic_exp.chi --background /tmp/ezpit_demo/synthetic_bkg.chi
+    uv run --extra examples python examples/demo_A_experimental_data.py \
+        /example_data/A_CoPiITOglass.chi --background /example_data/A_EmptyQuartzCap.chi
+
+    or
+
+    python examples/demo_A_experimental_data.py
 """
 
 import argparse
@@ -27,27 +30,37 @@ import tempfile
 import matplotlib.pyplot as plt
 import numpy as np
 
-import ezpit.processing as proc
-from ezpit.elem_tables import (
+import ezpit.core.processing as proc
+import ezpit.core.reduction as red
+import ezpit.core.smoothing as sm
+from ezpit.core.elem_tables import (
     get_aff_scattering_factors,
     get_compton_parameter_only,
     get_compton_scattering_factors,
 )
-from ezpit.io import composition_weights, convert_atom_names, group_atoms, parse_composition
+from ezpit.core.io import composition_weights, convert_atom_names, group_atoms, parse_composition
 
 # ----------------------------------------------------------------------------------
 # Command-line arguments (명령행 인자)
 # ----------------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description="Experimental S(q)/F(q)/G(r) processing from a q, I(q) file.")
-parser.add_argument("exp_file", help="Path to the experimental 2-column q, I(q) file (.chi/.iq).")
+
+default_dir = os.path.dirname(os.path.abspath(__file__))
+
+parser.add_argument("exp_file",
+    help="Path to the experimental 2-column q, I(q) file (.chi/.iq).",
+    nargs="?",  # Allows default value
+    default=os.path.join(default_dir, 'example_data', 'A_CoPiITOglass.chi')
+)
 parser.add_argument(
     "--background",
     help="Optional path to a 2-column q, I(q) background file. If omitted, no background is subtracted.",
+    default=os.path.join(default_dir, 'example_data', 'A_EmptyQuartzCap.chi')
 )
 parser.add_argument(
     "--composition",
-    default="Co38O119P20",
     help="Chemical composition of the sample (default: %(default)s).",
+    default="Co38O119P20",
 )
 args = parser.parse_args()
 
@@ -128,7 +141,7 @@ scattering_factors = get_aff_scattering_factors(atom_unique_names)
     normalized_intensity,
     normal_scattering_factor,
     normalization_scale,
-) = proc.cal_expSq(
+) = red.cal_expSq(
     atom_indices,
     scattering_factors,
     expqiq_data,
@@ -146,22 +159,22 @@ print("normalization_scale =", normalization_scale)
 # ----------------------------------------------------------------------------------
 # G(r): Lorch function + Whittaker-Henderson smoothing
 # ----------------------------------------------------------------------------------
-Fq_lorch = proc.apply_lorch_function(q, Fq)
-r_lorch, Gr_lorch = proc.cal_expGr_fft_from_Fq(q, Fq_lorch, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear")
+Fq_lorch = red.apply_lorch_function(q, Fq)
+r_lorch, Gr_lorch = red.cal_expGr_fft_from_Fq(q, Fq_lorch, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear")
 
 whittaker_lambda = 1000.0
 order = 2
-Fq_smoothed = proc.smooth_whittaker(Fq, lambda_=whittaker_lambda, order=order)
-r_smooth, Gr_from_smoothFq = proc.cal_expGr_fft_from_Fq(
+Fq_smoothed = sm.smooth_whittaker(Fq, lambda_=whittaker_lambda, order=order)
+r_smooth, Gr_from_smoothFq = red.cal_expGr_fft_from_Fq(
     q, Fq_smoothed, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear"
 )
-r_raw, Gr_from_rawFq = proc.cal_expGr_fft_from_Fq(q, Fq, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear")
+r_raw, Gr_from_rawFq = red.cal_expGr_fft_from_Fq(q, Fq, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear")
 
 # [EN] G(r) directly from S(q) with different high-Q padding modes.
 # [KR] 서로 다른 high-Q padding 모드로 S(q)에서 바로 G(r) 계산.
-r3, Gr3 = proc.cal_expGr_fft(q, Sq, rmin, rmax, rstep, pad_mode="decay", low_q_mode="linear")
-r4, Gr4 = proc.cal_expGr_fft(q, Sq, rmin, rmax, rstep, pad_mode="constant", low_q_mode="linear")
-r5, Gr5 = proc.cal_expGr_fft(q, Sq, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear")
+r3, Gr3 = red.cal_expGr_fft(q, Sq, rmin, rmax, rstep, pad_mode="decay", low_q_mode="linear")
+r4, Gr4 = red.cal_expGr_fft(q, Sq, rmin, rmax, rstep, pad_mode="constant", low_q_mode="linear")
+r5, Gr5 = red.cal_expGr_fft(q, Sq, rmin, rmax, rstep, pad_mode="zero", low_q_mode="linear")
 
 # ----------------------------------------------------------------------------------
 # Save intermediate results (중간 결과 저장)

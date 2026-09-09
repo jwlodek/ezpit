@@ -7,6 +7,7 @@ authors = [
     { name = "Gihan Kwon" },
     # Contributors
     # Brookhaven National Laboratory
+    { name = "Tj Barrett" },
     { name = "Cheng-Hung Lin" },
     { name = "Joshua Lynch" },
     { name = "Ajith Pattammattel" },
@@ -19,14 +20,15 @@ authors = [
     { name = "Yichen Liu" },
     { name = "Dongyoon Lee" },
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
+    "numba>=0.62.1",
     "numpy>=2.5.1",
     "scipy>=1.18.0",
 ]
 
 [project.scripts]
-ezpdf-wh-smooth = "ezpit.wh_smooth:main"
+ezpdf-wh-smooth = "ezpit.whittaker_henderson.wh_smooth:main"
 ezpdf-gui = "ezpit.gui.main:main"
 
 [project.optional-dependencies]
@@ -115,7 +117,7 @@ line-length = 120
 # Large generated data tables; kept in a hand-aligned table-like layout for
 # readability, so exclude from formatting/linting. force-exclude ensures the
 # file is skipped even when passed explicitly (e.g. by pre-commit).
-extend-exclude = ["src/ezpit/elem_tables.py"]
+extend-exclude = ["src/ezpit/core/elem_tables.py"]
 force-exclude = true
 lint.select = [
     "B",       # flake8-bugbear - https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
@@ -159,3 +161,8 @@ convention = "numpy"
 # See https://github.com/DiamondLightSource/python-copier-template/issues/154
 # Remove this line to forbid private member access in tests
 "tests/**/*" = ["SLF001", "S101", "D"]
+
+[tool.basedpyright]
+typeCheckingMode = "recommended" # Options: off, basic, standard, strict, recommended, all
+# stubPath = "./typings"          # Location for custom type stubs
+strictGenericNarrowing = true    # Enforce safe generic validation
