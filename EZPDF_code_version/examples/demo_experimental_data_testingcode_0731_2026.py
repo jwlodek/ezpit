@@ -34,11 +34,16 @@ compton_atomnumber_file = input_base + 'compton_atomicnumber.txt'
 
 # [EN] Input data paths (Experiment and Background)
 # [KR] 실제 실험 데이터(.chi 파일)와 배경 데이터 파일 경로
-expqiq_input_base = "D:/1-Manuscript_2014/EZPDF_EZPIT/CoPi_test/"
-bkgqiq_input_base = "D:/1-Manuscript_2014/EZPDF_EZPIT/CoPi_test/"
+# expqiq_input_base = "D:/1-Manuscript_2014/EZPDF_EZPIT/CoPi_test/"
+# bkgqiq_input_base = "D:/1-Manuscript_2014/EZPDF_EZPIT/CoPi_test/"
 
-expqiq_data = expqiq_input_base + 'A_CoPiITOglass_02142024_1-test_20240219-154304_696917_primary-dk_sub_image-0.chi'
-bkgqiq_data = bkgqiq_input_base + 'A_emptyquartzcap_0p5_20240219-122602_4e50c5_primary-dk_sub_image-0.chi'
+expqiq_input_base = "D:/1-Beamtime/2021-2/user_data_Kwon_307297_304ab09f_2021-07-19-0607-Insitu-IrBL/Not-smoothen data/"
+bkgqiq_input_base = "D:/1-Beamtime/2021-2/user_data_Kwon_307297_304ab09f_2021-07-19-0607-Insitu-IrBL/Not-smoothen data/"
+
+expqiq_data = expqiq_input_base + 'A_0p303V-1_20210718-234335_db5a7d_0001_dark_corrected_img.chi'
+bkgqiq_data = bkgqiq_input_base + 'A_0p1MKNO3_GC_Kap_20210718-145444_a5bb42_0001_dark_corrected_img.chi'
+
+
 
 # [EN] Parameters for Analysis (User settings)
 # [KR] 분석 파라미터 설정 (사용자가 값을 바꾸며 테스트하는 곳)
@@ -62,18 +67,19 @@ bkgqiq_data = bkgqiq_input_base + 'A_emptyquartzcap_0p5_20240219-122602_4e50c5_p
 #      (5) 소수 조성은 composition_weights 사용 — group_atoms 바로 뒤의
 #      "Fractional composition example" 주석 블록 참고.
 # ----------------------------------------------------------------------------------
-composition = {'Co': 38, 'O': 119, 'P': 20}  # [EN] Chemical composition / [KR] 화학 조성
+# composition = {'Co': 38, 'O': 119, 'P': 20}  # [EN] Chemical composition / [KR] 화학 조성
+composition = {'Ir': 1, 'O': 1}  # [EN] Chemical composition / [KR] 화학 조성
 # composition = "Co38O119P20"                # [EN] String form (same result) / [KR] 문자열 (동일 결과)
 # composition = "Co 38 O 119 P 20"           # [EN] Spaced string / [KR] 공백 구분 문자열
 # composition = "SiO2"                        # [EN] Count of 1 omitted / [KR] 개수 1 생략
 # composition = {'Co': 0.038, 'O': 0.119, 'P': 0.020}  # [EN] Fractional dict (auto-handled) / [KR] 소수 딕셔너리 (자동 처리)
 # composition = "Li0.2Co0.36Mn0.37Ni0.07"    # [EN] Fractional string (auto-handled) / [KR] 소수 문자열 (자동 처리)
-qmin = 0.6  # [EN] Minimum Q (float) / [KR] Q 최소값
-qmax = 23  # [EN] Maximum Q (float) / [KR] Q 최대값
+qmin = 0.8  # [EN] Minimum Q (float) / [KR] Q 최소값
+qmax = 21.5  # [EN] Maximum Q (float) / [KR] Q 최대값
 qstep = 0.01  # [EN] Q step size (float) / [KR] Q 간격
-background_scale = 0.27  # [EN] Bkg scale factor (float) / [KR] 배경 제거 비율
+background_scale = 2.98  # [EN] Bkg scale factor (float) / [KR] 배경 제거 비율
 qdamp = 0  # [EN] Resolution damping factor / [KR] 기기 해상도 감쇠 인자
-poly_order = 7.208  # [EN] Polynomial order for correction (float) / [KR] F(q) 보정 다항식 차수
+poly_order = 10.27  # [EN] Polynomial order for correction (float) / [KR] F(q) 보정 다항식 차수
 rpoly = np.pi * poly_order / qmax
 # print("rpoly = ", rpoly)
 rmin = 0  # [EN] Minimum r for G(r) / [KR] G(r) 계산 시작 거리

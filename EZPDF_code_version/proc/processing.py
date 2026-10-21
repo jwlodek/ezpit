@@ -1312,23 +1312,24 @@ def cal_expGr_fft(q, Sq_or_Fq, rmin=0, rmax=100, rstep=0.01, is_Fq=False,
         pad_Fq = np.zeros(num_point)
 
         if q[0] > 0.0:
-            if low_q_mode == "anchor":
-                # [EN] Low-q extrapolation with F(q=0) = 0 enforced (anchor method).
-                #      F(q) = q*(S(q)-1), so F(0) = 0 by definition regardless of S(0).
-                #      A straight line from (0, 0) to (q[0], Fq[0]) fills the gap,
-                #      which is mathematically consistent with the definition of F(q).
-                # [KR] anchor 방식: F(0)=0을 강제하고 (qmin, F(qmin))까지 직선 연결.
-                q_low = np.arange(num_point) * qstep_calc
-                pad_Fq[:num_point] = (Fq[0] / q[0]) * q_low
-            else:
-                # [EN] Linear extrapolation (legacy method via scipy interp1d).
-                #      Uses the slope of the first two data points to extrapolate down to q=0.
-                #      May result in F(0) ≠ 0 (not physically guaranteed).
-                # [KR] Linear 외삽 (구버전, scipy interp1d 사용).
-                #      처음 두 점의 기울기로 q=0까지 외삽. F(0) ≠ 0 가능.
-                f_inter = interpolate.interp1d(q, Fq, fill_value="extrapolate",
-                                               kind=extrapolate_type)
-                pad_Fq[:num_point] = f_inter(np.arange(num_point) * qstep_calc)
+            # if low_q_mode == "anchor":
+            #     # [EN] Low-q extrapolation with F(q=0) = 0 enforced (anchor method).
+            #     #      F(q) = q*(S(q)-1), so F(0) = 0 by definition regardless of S(0).
+            #     #      A straight line from (0, 0) to (q[0], Fq[0]) fills the gap,
+            #     #      which is mathematically consistent with the definition of F(q).
+            #     # [KR] anchor 방식: F(0)=0을 강제하고 (qmin, F(qmin))까지 직선 연결.
+            #     q_low = np.arange(num_point) * qstep_calc
+            #     pad_Fq[:num_point] = (Fq[0] / q[0]) * q_low
+            # else:
+            #     # [EN] Linear extrapolation (legacy method via scipy interp1d).
+            #     #      Uses the slope of the first two data points to extrapolate down to q=0.
+            #     #      May result in F(0) ≠ 0 (not physically guaranteed).
+            #     # [KR] Linear 외삽 (구버전, scipy interp1d 사용).
+            #     #      처음 두 점의 기울기로 q=0까지 외삽. F(0) ≠ 0 가능.
+            #     f_inter = interpolate.interp1d(q, Fq, fill_value="extrapolate",
+            #                                    kind=extrapolate_type)
+            #     pad_Fq[:num_point] = f_inter(np.arange(num_point) * qstep_calc)
+            pad_Fq[:num_point] = 0.0
 
         # [EN] Save the three segments for visualization (BEFORE Nyquist interpolation)
         # [KR] Nyquist 보간 전 3구간을 시각화용으로 저장
@@ -1435,15 +1436,16 @@ def cal_expGr_fft_from_Fq(q, Fq, rmin=0, rmax=100, rstep=0.01, pad_mode="zero",
     pad_Fq = np.zeros(num_point)
 
     if q[0] > 0.0:
-        if low_q_mode == "anchor":
-            # Low-q extrapolation with F(q=0) = 0 enforced (anchor method).
-            q_low = np.arange(num_point) * qstep
-            pad_Fq[:num_point] = (Fq[0] / q[0]) * q_low
-        else:
-            # Linear extrapolation (legacy method via scipy interp1d).
-            f_inter = interpolate.interp1d(q, Fq, fill_value="extrapolate",
-                                           kind=extrapolate_type)
-            pad_Fq[:num_point] = f_inter(np.arange(num_point) * qstep)
+        # if low_q_mode == "anchor":
+        #     # Low-q extrapolation with F(q=0) = 0 enforced (anchor method).
+        #     q_low = np.arange(num_point) * qstep
+        #     pad_Fq[:num_point] = (Fq[0] / q[0]) * q_low
+        # else:
+        #     # Linear extrapolation (legacy method via scipy interp1d).
+        #     f_inter = interpolate.interp1d(q, Fq, fill_value="extrapolate",
+        #                                    kind=extrapolate_type)
+        #     pad_Fq[:num_point] = f_inter(np.arange(num_point) * qstep)
+        pad_Fq[:num_point] = 0.0
 
     Fq_vals = np.append(pad_Fq, Fq)
     r_list = np.arange(rmin, rmax + rstep, rstep)
