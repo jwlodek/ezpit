@@ -582,13 +582,13 @@ def cal_expGr_fft(q, Sq_or_Fq, rmin=0, rmax=100, rstep=0.01,
                   extrapolate_type="linear", is_Fq=False, pad_mode="zero",
                   use_lorch=False):
     """
-    Calculates G(r) from S(q) or F(q) using FFT with low-q extrapolation
+    Calculates G(r) from S(q) or F(q) using FFT with low-q zero filling
     and high-q padding.
 
-    Low-q extrapolation:
-        The q < qmin region is filled by scipy interp1d extrapolation
-        (extrapolate_type, default 'linear'). This uses the slope of the data
-        near qmin and does NOT force F(q=0)=0, matching the EZPDF GUI behaviour.
+    Low-q zero filling:
+        The unmeasured region below the first input Q is filled with F(Q)=0.
+        The first input F(Q) and all measured values remain unchanged.
+        extrapolate_type is retained for call compatibility; no extrapolation. 
 
     Nyquist check:
         The IFFT yields total_point values, but only the alias-free first half
@@ -623,12 +623,18 @@ def cal_expGr_fft(q, Sq_or_Fq, rmin=0, rmax=100, rstep=0.01,
         else:
             Fq = (Sq_or_Fq - 1) * q
 
-        # --- Low-q extrapolation (linear interp1d; F(0) != 0 allowed) ---
+        # --- Low-q zero filling (no extrapolated signal) ---
         pad_Fq = np.zeros(num_point)
 
-        if q[0] > 0.0:
-            f_inter = interpolate.interp1d(q, Fq, fill_value="extrapolate", kind=extrapolate_type)
-            pad_Fq[:num_point] = f_inter(np.arange(num_point) * qstep_calc)
+        # Previous implementation: linear extrapolation below the first Q.
+        # Kept as comments for reference; this block is NOT executed.
+        # if q[0] > 0.0:
+        #     f_inter = interpolate.interp1d(q, Fq, fill_value="extrapolate", kind=extrapolate_type)
+        #     pad_Fq[:num_point] = f_inter(np.arange(num_point) * qstep_calc)
+
+        # Active implementation: zero signal below the first input Q.
+        # Preserve the first measured F(Q) and every subsequent input value.
+        pad_Fq[:] = 0.0
 
         Fq_vals = np.append(pad_Fq, Fq)
 
